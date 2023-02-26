@@ -1,0 +1,201 @@
+<html>
+<head>
+<style>
+#container {
+	width: 20%;
+	max-height: 90%;
+	overflow-y: auto;
+	overflow-x: hidden;
+	font-size: 1vw;
+}
+
+input, select {
+	font-size: 1vw;
+	width: 100%;
+}
+
+#input p {
+    text-align: center;
+    margin: 0;
+}
+
+label {
+	display: inline-grid;
+	text-align: center;
+	padding: 2px;
+}
+
+label input {
+	width: auto;
+}
+
+#box {
+	background: #4c4c4c;
+	color: white;
+	padding: 3px 5px;
+	margin-bottom: 1px;
+	font-family: system-ui;
+	font-weight: 700;
+}
+
+#desc {
+	font-style: italic;
+	font-weight: 500;
+}
+
+#title {
+	display: flex;
+}
+
+#icon {
+	width: 5%;
+	margin-right: 4px;
+}
+
+#text {
+	vertical-align: center;
+}
+
+#input {
+	margin: 2px 0px;
+    text-align: center;
+}
+</style>
+<script>
+var post = function(action, data) {
+	fetch('https://' + GetParentResourceName() + '/' + action, {
+		method: 'POST',
+		body: JSON.stringify(data)
+	})
+}
+
+var submit = function() {
+	var data = menu
+	menu.forEach(function(element, index) {
+		if (element.type) {
+			switch(element.type) {
+				case 'button':
+				break
+				case 'radio':
+				case 'checkbox':
+				case 'select':
+					container.children[index].querySelectorAll(element.type == "select" ? "option" : "input").forEach(function(check, i) {
+						element.value[i][1] = element.type == "select" ? check.selected : check.checked
+					})
+				break
+				default:
+					element.value = container.children[index].querySelector('input').value
+				break
+			}
+		}
+	})
+	return data
+}
+
+var create = function(parent, type, attributes) {
+	var element = document.createElement(type)
+	if (attributes) {
+		Object.keys(attributes).forEach(attribute => {
+			element.setAttribute(attribute, attributes[attribute])
+		})
+	}
+	parent.appendChild(element)
+	return element
+}
+
+var open = function() {
+	container = create(document.body, 'div', {id:'container'})
+	menu.forEach(function(element, index) {
+		var box = create(container, 'div', {id:'box'})
+		if (element.title) {
+			var title = create(box, 'div', {id:'title'})
+			if (element.icon) {
+				create(title, 'img', {id:'icon'}).src = element.icon
+			}
+			create(title, 'div', {id:'text'}).innerHTML = element.title
+		}
+		if (element.type) {
+			var input = create(box, 'div', {id:'input'})
+			switch(element.type) {
+				case 'button':
+					box.onclick = function() {
+						post('selected', [index + 1, submit()])
+					}
+				break
+				case 'radio':
+				case 'checkbox':
+					element.value.forEach(function(value, i) {
+						var label = create(input, 'label')
+						var radio = create(label, 'input', {
+							type : element.type,
+							name : element.type + index
+						})
+						create(label, 'span').innerHTML = value[0]
+						if (value[1]) {
+							radio.checked = true
+						}
+					})
+				break
+				case 'select':
+					var select = create(input, element.type)
+					element.value.forEach(function(value, i) {
+						var option = create(select, 'option', {
+							value : i
+						})
+						option.innerHTML = value[0]
+						if (value[1]) {
+							option.selected = true
+						}
+					})
+				break
+				default:
+					var bar = create(input, 'input', {
+						type:element.type,
+						placeholder:element.placeholder||'',
+						min:element.min||null,
+						max:element.max||null,
+						step:element.step||null,
+						maxlength:element.maxlength||null,
+					})
+					if (element.value) {
+						bar.value = element.value
+					}
+					if (element.type == 'range') {
+						var num = create(input, 'p')
+						num.innerHTML = bar.value
+						bar.oninput = function() {
+							num.innerHTML = this.value
+						}
+					}
+				break
+			}
+		}
+		if (element.desc) {
+			create(box, 'div', {id:'desc'}).innerHTML = element.desc
+		}
+		box.oninput = function() {
+			post('changed', [index + 1, submit()])
+		}
+	})
+}
+
+window.addEventListener('message', e => {
+	document.body.innerHTML = null
+	menu = e.data
+	if (menu) {
+		open()	
+	}
+})
+
+window.addEventListener("keydown", e => {
+	if (e.key == "Escape" || e.key == "Backspace") {
+		if (e.key != "Backspace" || e.target.tagName != "INPUT") {
+			post('closed', submit())
+		}
+	}
+})
+</script>
+</head>
+<body>
+</body>
+</html>
