@@ -1,23 +1,71 @@
+local function freezePlayer(freeze)
+    local player = PlayerId()
+    SetPlayerControl(player, not freeze)
+
+    SetPlayerInvincible(player, freeze)
+
+	local ped = PlayerPedId()
+    SetEntityVisible(ped, not freeze or not IsEntityVisible(ped))
+
+    if freeze or IsPedOnFoot(ped) then
+        SetEntityCollision(ped, not freeze)
+    end
+
+    FreezeEntityPosition(ped, freeze)
+
+    if freeze and not IsPedFatallyInjured(ped) then
+        ClearPedTasksImmediately(ped)
+    end
+end
+
+RegisterNetEvent('playerConnected')
+AddEventHandler('playerConnected', function()
+	local ped = PlayerPedId()
+	freezePlayer(true)
+	if Config.sky and ped ~= 2 then
+		SwitchOutPlayer(ped, 0, 1)
+	end
+end)
+
+TriggerEvent('playerConnected')
+
 RegisterNetEvent('playerSpawned')
 AddEventHandler('playerSpawned', function(character)
-	local status = character.status
-	
-	local player = PlayerId()
-	SetPlayerMaxArmour(player, status.maxarmour)
-	SetPlayerHealthRechargeMultiplier(player, status.rechargemultiplier)
-	SetPlayerHealthRechargeLimit(player, status.rechargelimit)
-	
-	Wait(1)
-	local ped = PlayerPedId()
-	SetEntityHealth(ped, status.health)
-	SetPedArmour(ped, status.armour)
-	SetEntityMaxHealth(ped, status.maxhealth)
+	Citizen.CreateThread(function()
+		local status = character.status
 
-	SetMaxWantedLevel(Config.policeNPC and 5 or 0)
-	NetworkSetFriendlyFireOption(Config.PVP)
+		local player = PlayerId()
+		
+		if IsPlayerDead(player) and status.health > 0 then
+			NetworkResurrectLocalPlayer(character.position.x, character.position.y, character.position.z, character.position.w)
+		end
 
-	ShutdownLoadingScreen()
-	ShutdownLoadingScreenNui()
+		SetMaxWantedLevel(Config.policeNPC and 5 or 0)
+		NetworkSetFriendlyFireOption(Config.PVP)
+
+		SetPlayerMaxArmour(player, status.maxarmour)
+		SetPlayerHealthRechargeMultiplier(player, status.rechargemultiplier)
+		SetPlayerHealthRechargeLimit(player, status.rechargelimit)
+
+		while not HasCollisionLoadedAroundEntity(PlayerPedId()) do
+			RequestCollisionAtCoord(character.position.x, character.position.y, character.position.z)
+			Wait(1)
+        end
+
+		if Config.sky and 
+			SwitchInPlayer(PlayerPedId())
+
+			while IsPlayerSwitchInProgress() do Wait(1) end
+		end
+
+		SetEntityMaxHealth(PlayerPedId(), status.maxhealth)
+		SetPedArmour(PlayerPedId(), status.armour)
+		SetEntityHealth(PlayerPedId(), status.health)
+
+		freezePlayer()
+
+		DoScreenFadeIn(100)
+	end)
 end)
 
 local function ConfirmMenu(title, confirm, cancel)
@@ -101,6 +149,10 @@ local function IdentityMenu(confirm, cancel, identity)
 						r.desc = '* No spaces allowed'
 						return IdentityMenu(confirm, cancel, res[2])
 					end
+					if r.value:match("%d+") then
+						r.desc = '* No numbers allowed'
+						return IdentityMenu(confirm, cancel, res[2])
+					end
 				end
 			end
 			-- dob
@@ -133,7 +185,7 @@ local function IdentityMenu(confirm, cancel, identity)
 	end)
 end
 
-local function characterOptions(id, characters)
+local function characterOptions(id, characters, cancel)
 	exports.sex_menu:menu({
 		{
 			title = characters[id].identity.firstname
@@ -154,13 +206,11 @@ local function characterOptions(id, characters)
 		end or function()
 			TriggerServerEvent('deleteCharacter', id)
 			table.remove(characters, id)
-			charactersMenu(characters)
+			cancel()
 		end, function()
-			characterOptions(id, characters)
+			characterOptions(id, characters, cancel)
 		end)
-	end, false, function()
-		charactersMenu(characters)
-	end)
+	end, false, cancel)
 end
 
 local function charactersMenu(characters)
@@ -215,7 +265,9 @@ local function charactersMenu(characters)
 				charactersMenu(characters)
 			end)
 		else
-			characterOptions(id, characters)
+			characterOptions(id, characters, function()	
+				charactersMenu(characters)
+			end)
 		end
 	end)
 end
@@ -224,3 +276,6 @@ RegisterNetEvent('charactersMenu')
 AddEventHandler('charactersMenu', charactersMenu)
 
 TriggerServerEvent('playerConnected')
+
+ShutdownLoadingScreen()
+ShutdownLoadingScreenNui()

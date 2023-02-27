@@ -1,4 +1,4 @@
-local players = {}
+players = {}
 local kvp = {}
 
 RegisterNetEvent('playerConnected')
@@ -66,7 +66,6 @@ local function playCharacter(src, player, characters, id)
 	SetPedDefaultComponentVariation(ped)
 	SetEntityCoords(ped, vec3(character.position.x, character.position.y, character.position.z))
 	SetEntityHeading(ped, character.position.w)
-	FreezeEntityPosition(ped)
 	player.ped = ped
 	player.character = id
 	TriggerClientEvent('playerSpawned', src, character)
@@ -119,6 +118,7 @@ end)
 RegisterCommand('relog', function(src)
 	local player = players[src]
 	savePlayer(player)
+	TriggerClientEvent('playerConnected', src)
 	players[src] = {
 		identifier = player.identifier
 	}
