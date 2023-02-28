@@ -1,6 +1,6 @@
-local function createVehicle(src, model)
+function createVehicle(src, model)
 	local player = players[src]
-	if not model then
+	if not player or not model then
 		return
 	end
 	TriggerClientCallback("getVehicleModel", src, function(type, maxseats, seats, passengers)
@@ -37,6 +37,7 @@ local function createVehicle(src, model)
 end
 
 RegisterCommand("car", function(src, args)
-	local model = args[1]
-	createVehicle(src, model)
+	local player = args[1] == 'me' and src or tonumber(args[1])
+	local model = args[2]
+	createVehicle(player, model)
 end)

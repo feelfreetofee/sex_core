@@ -19,11 +19,15 @@ shared_scripts {
 server_scripts {
 	'server/cb.lua',
 	'server/init.lua',
-	'server/vehicle.lua'
+	'server/characters.lua',
+	'server/vehicle.lua',
+	'server/commands.lua'
 }
 
 client_scripts {
 	'client/cb.lua',
+	'client/player.lua',
+	'client/characters.lua',
 	'client/init.lua',
 	'client/vehicle.lua'
 }
