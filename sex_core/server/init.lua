@@ -5,13 +5,22 @@ RegisterNetEvent('playerConnected')
 AddEventHandler('playerConnected', function()
 	local src = source
 	local identifier = GetPlayerIdentifier(src)
+	-- Player(src).state.identifier = identifier
+	print(Player(src).__data)
 	players[src] = {
 		identifier = identifier
 	}
 	if not kvp[identifier] then
 		kvp[identifier] = json.decode(GetResourceKvpString(identifier)) or {}
 	end
-	TriggerClientEvent('charactersMenu', src, kvp[identifier])
+	local player = kvp[identifier]
+	if Config.multicharacter then
+		TriggerClientEvent('charactersMenu', src, player)
+	elseif player[1] then
+		playCharacter(src, players[src], player, 1)
+	else
+		TriggerClientEvent('registerIdentity', src)
+	end
 end)
 
 function savePlayer(player)

@@ -18,6 +18,7 @@ shared_scripts {
 
 server_scripts {
 	'server/cb.lua',
+	'server/player.lua',
 	'server/init.lua',
 	'server/characters.lua',
 	'server/vehicle.lua',
@@ -29,5 +30,6 @@ client_scripts {
 	'client/player.lua',
 	'client/characters.lua',
 	'client/init.lua',
-	'client/vehicle.lua'
+	'client/vehicle.lua',
+	'client/test.lua'
 }

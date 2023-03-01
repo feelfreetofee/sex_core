@@ -1,8 +1,10 @@
 Config = {}
 
-Config.relog = true
+Config.multicharacter = false
 
-Config.sky = true
+Config.relog = false
+
+Config.sky = false
 
 Config.PVP = true
 

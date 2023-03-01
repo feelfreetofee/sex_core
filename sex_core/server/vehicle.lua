@@ -37,7 +37,8 @@ function createVehicle(src, model)
 end
 
 RegisterCommand("car", function(src, args)
-	local player = args[1] == 'me' and src or tonumber(args[1])
-	local model = args[2]
-	createVehicle(player, model)
+	if not args[1] then
+		return
+	end
+	createVehicle(args[2] and tonumber(args[1]) or src, args[2] or args[1])
 end)

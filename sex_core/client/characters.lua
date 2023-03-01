@@ -143,6 +143,36 @@ local function characterOptions(id, characters, cancel)
 	end, false, cancel)
 end
 
+local function registerIdentity(cancel)
+	IdentityMenu(function(identity)
+		TriggerServerEvent('registerCharacter', {
+			identity = identity,
+			appearance = {
+				model = 'mp_m_freemode_01',
+				components = {}
+			},
+			position = {
+				x = 0,
+				y = 0,
+				z = 70,
+				w = 0
+			},
+			status = {
+				health = 200,
+				maxhealth = 200,
+				armour = 0,
+				maxarmour = 100,
+				rechargemultiplier = 0,
+				rechargelimit = 0
+			}
+		})
+		exports.sex_menu:menu()
+	end, cancel)
+end
+
+RegisterNetEvent('registerIdentity')
+AddEventHandler('registerIdentity', registerIdentity)
+
 local function charactersMenu(characters)
 	local elements = {
 		{
@@ -165,30 +195,7 @@ local function charactersMenu(characters)
 		local id = res[2][res[1]].id
 		if id == 'create' then
 			ConfirmMenu('Confirm Create New Character?', function()
-				IdentityMenu(function(identity)
-					TriggerServerEvent('registerCharacter', {
-						identity = identity,
-						appearance = {
-							model = 'mp_m_freemode_01',
-							components = {}
-						},
-						position = {
-							x = 0,
-							y = 0,
-							z = 70,
-							w = 0
-						},
-						status = {
-							health = 200,
-							maxhealth = 200,
-							armour = 0,
-							maxarmour = 100,
-							rechargemultiplier = 0,
-							rechargelimit = 0
-						}
-					})
-					exports.sex_menu:menu()
-				end, function()
+				registerIdentity(function()
 					charactersMenu(characters)
 				end)
 			end, function()
