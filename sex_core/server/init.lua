@@ -5,8 +5,6 @@ RegisterNetEvent('playerConnected')
 AddEventHandler('playerConnected', function()
 	local src = source
 	local identifier = GetPlayerIdentifier(src)
-	-- Player(src).state.identifier = identifier
-	print(Player(src).__data)
 	players[src] = {
 		identifier = identifier
 	}
