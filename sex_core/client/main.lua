@@ -22,6 +22,7 @@ RegisterNetEvent('revivePlayer')
 AddEventHandler('revivePlayer', function()
 	if IsPlayerDead(PlayerId()) then
 		local ped = PlayerPedId()
-		NetworkResurrectLocalPlayer(GetEntityCoords(ped), GetEntityHeading(ped))
+		local coords = GetEntityCoords(ped)
+		NetworkResurrectLocalPlayer(coords.x, coords.y, coords.z, GetEntityHeading(ped))
 	end
 end)

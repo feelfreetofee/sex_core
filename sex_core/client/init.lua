@@ -1,5 +1,7 @@
 RegisterNetEvent('playerSpawned')
-AddEventHandler('playerSpawned', function(character)
+AddEventHandler('playerSpawned', function(char)
+	character = char
+
 	local status = character.status
 	
 	if status.health > 0 then

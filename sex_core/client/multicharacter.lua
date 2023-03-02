@@ -1,4 +1,4 @@
-local function locale(text)
+function locale(text)
 	return text
 end
 

@@ -1,11 +1,11 @@
 Config = {}
 
-Config.multicharacter = true
+Config.multicharacter = false
 
-Config.identity = true
+Config.identity = false
 
-Config.sky = true
+Config.sky = false
 
 Config.PVP = true
 
-Config.policeNPC = false
+Config.policeNPC = true
